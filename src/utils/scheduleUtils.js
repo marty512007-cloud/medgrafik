@@ -3,12 +3,14 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import "dayjs/locale/ru";
 
-// Подключаем плагины
+// Подключаем плагины и локаль
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
+dayjs.locale("ru");
 
 /**
  * Генерирует массив временных слотов на основе рабочего интервала и перерывов
@@ -81,7 +83,7 @@ export function validateAppointment(doctors, workSlots, appointments, doctorId, 
   const slotErrors = validateSlot(workSlots, doctorId, slotDateTime);
   errors.push(...slotErrors);
 
-  // 3. Проверка двойного бронирования (уникальность слота)
+  // 3. Проверка двойного б��онирования (уникальность слота)
   const existingBooking = appointments.find(
     a => a.doctorId === doctorId && a.slotDateTime === slotDateTime && a.status === "booked"
   );
@@ -181,9 +183,12 @@ export function getUtilizationByDate(workSlots, appointments, dateFrom, dateTo) 
       return slotDate === dateStr && a.status === "booked";
     }).length;
 
+    // 🇷🇺 Используем русское название дня недели
+    const dayName = current.format("dddd"); // Теперь будет на русском!
+
     dates[dateStr] = {
       date: dateStr,
-      dayName: current.format("dddd"),
+      dayName,
       totalSlots,
       bookedSlots,
       utilization: totalSlots === 0 ? 0 : Math.round((bookedSlots / totalSlots) * 100)

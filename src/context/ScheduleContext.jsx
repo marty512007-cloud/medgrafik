@@ -229,7 +229,36 @@ export function ScheduleProvider({ children }) {
   }, [state.appointments]);
 
   const generateSchedule = useCallback((doctorId, date, startTime, endTime, slotMinutes, breakStart, breakEnd) => {
+    // 🔴 ПРОВЕРКА: существует ли уже расписание для этого врача на эту дату?
+    const existingSchedule = state.workSlots.find(
+      ws => ws.doctorId === doctorId && ws.date === date
+    );
+
+    if (existingSchedule) {
+      dispatch({ 
+        type: "SET_ERROR", 
+        payload: `Расписание для этого врача на ${date} уже существует! Удалите его перед созданием нового.` 
+      });
+      return { 
+        success: false, 
+        error: `Расписание для этого врача на ${date} уже существует!`,
+        slotCount: 0
+      };
+    }
+
     const slots = generateSlots(date, startTime, endTime, slotMinutes, breakStart, breakEnd);
+
+    if (slots.length === 0) {
+      dispatch({ 
+        type: "SET_ERROR", 
+        payload: "Не удалось создать слоты. Проверьте время работы и перерыв." 
+      });
+      return { 
+        success: false, 
+        error: "Не удалось создать слоты",
+        slotCount: 0
+      };
+    }
 
     const workSlot = {
       id: uuidv4(),
@@ -250,7 +279,7 @@ export function ScheduleProvider({ children }) {
     });
 
     return { success: true, slotCount: slots.length };
-  }, []);
+  }, [state.workSlots]);
 
   return (
     <ScheduleContext.Provider

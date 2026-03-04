@@ -6,6 +6,11 @@ import { AuthProvider } from "./context/AuthContext";
 import { ScheduleProvider } from "./context/ScheduleContext";
 import "./index.css";
 
+// 🇷🇺 Подключаем русский локаль для dayjs
+import dayjs from "dayjs";
+import "dayjs/locale/ru";
+dayjs.locale("ru");
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <AuthProvider>
