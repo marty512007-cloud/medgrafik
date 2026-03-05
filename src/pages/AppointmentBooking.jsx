@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { useSchedule } from "../context/ScheduleContext";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../hooks/useToast";
 import dayjs from "dayjs";
+import "dayjs/locale/ru";
+
+dayjs.locale("ru");
 
 export default function AppointmentBooking() {
   const { doctors, workSlots, appointments, bookAppointment, cancelAppointment, rescheduleAppointment } = useSchedule();
   const { user } = useAuth();
+  const { success, error, warning } = useToast();
 
-  const [step, setStep] = useState("select-doctor"); // select-doctor, select-slot, confirm
+  const [step, setStep] = useState("select-doctor");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [patientCode, setPatientCode] = useState("");
@@ -16,7 +21,34 @@ export default function AppointmentBooking() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleAppointmentId, setRescheduleAppointmentId] = useState(null);
+  const [newScheduleDate, setNewScheduleDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [newScheduleTime, setNewScheduleTime] = useState("");
+
+  // Проверка прав доступа
+  const isRegistrar = user?.role === "registrar";
+
+  if (!isRegistrar) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">📋 Управление записями</h1>
+          <p className="text-gray-600 mt-1">Запись, отмена и перенос приёмов</p>
+        </div>
+
+        <div className="card bg-red-50 border-2 border-red-200 p-8 text-center">
+          <p className="text-2xl mb-2">🔐 Доступ запрещён</p>
+          <p className="text-red-800 font-semibold">
+            Только регистратор может управлять записями пациентов
+          </p>
+          <p className="text-gray-600 mt-4 text-sm">
+            Ваша роль: <span className="font-bold capitalize">{user?.role}</span>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const doctorSlots = workSlots.filter(
     ws => ws.doctorId === selectedDoctor && ws.date === selectedDate
@@ -30,7 +62,7 @@ export default function AppointmentBooking() {
 
   const handleBooking = () => {
     if (!patientCode || !patientName || !selectedSlot) {
-      alert("Заполните все поля");
+      warning("Заполните все поля");
       return;
     }
 
@@ -43,29 +75,52 @@ export default function AppointmentBooking() {
     );
 
     if (result.success) {
-      setSuccessMessage("Запись успешно создана!");
+      success(`✅ Запись успешно создана!`);
       setTimeout(() => {
         setStep("select-doctor");
         setSelectedDoctor(null);
         setSelectedSlot(null);
         setPatientCode("");
         setPatientName("");
-        setSuccessMessage("");
-      }, 2000);
+      }, 1500);
+    } else {
+      error(`❌ ${result.error}`);
     }
   };
 
   const handleCancelAppointment = () => {
     if (!cancelReason) {
-      alert("Укажите причину отмены");
+      warning("Укажите причину отмены");
       return;
     }
 
     const result = cancelAppointment(selectedAppointmentId, cancelReason, user?.id);
     if (result.success) {
+      success("✅ Запись отменена");
       setShowCancelModal(false);
-      setSuccessMessage("Запись отменена");
-      setTimeout(() => setSuccessMessage(""), 2000);
+      setSelectedAppointmentId(null);
+      setCancelReason("");
+    } else {
+      error(`❌ ${result.error}`);
+    }
+  };
+
+  const handleRescheduleAppointment = () => {
+    if (!newScheduleTime) {
+      warning("Выберите время");
+      return;
+    }
+
+    const newSlotDateTime = `${newScheduleDate} ${newScheduleTime}`;
+    const result = rescheduleAppointment(rescheduleAppointmentId, newSlotDateTime, user?.id);
+
+    if (result.success) {
+      success("✅ Запись перенесена");
+      setShowRescheduleModal(false);
+      setRescheduleAppointmentId(null);
+      setNewScheduleTime("");
+    } else {
+      error(`❌ ${result.error}`);
     }
   };
 
@@ -73,15 +128,9 @@ export default function AppointmentBooking() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Управление записями</h1>
-        <p className="text-gray-600 mt-1">Запись, отмена и перенос приёмов</p>
+        <h1 className="text-3xl font-bold text-gray-900">📋 Управление записями</h1>
+        <p className="text-gray-600 mt-1">Запись, отмена и перенос приёмов пациентов</p>
       </div>
-
-      {successMessage && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-800 font-medium">
-          ✓ {successMessage}
-        </div>
-      )}
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-200">
@@ -93,7 +142,7 @@ export default function AppointmentBooking() {
               : "border-transparent text-gray-600"
           }`}
         >
-          Новая запись
+          ➕ Новая запись
         </button>
         <button
           onClick={() => setStep("my-appointments")}
@@ -103,7 +152,7 @@ export default function AppointmentBooking() {
               : "border-transparent text-gray-600"
           }`}
         >
-          Мои записи ({userAppointments.length})
+          📋 Все записи ({userAppointments.length})
         </button>
       </div>
 
@@ -227,10 +276,10 @@ export default function AppointmentBooking() {
         </div>
       )}
 
-      {/* My Appointments */}
+      {/* All Appointments */}
       {step === "my-appointments" && (
         <div className="card">
-          <h3 className="card-header">Мои записи</h3>
+          <h3 className="card-header">Все записи пациентов</h3>
           {userAppointments.length > 0 ? (
             <div className="space-y-3">
               {userAppointments.map(apt => {
@@ -238,15 +287,25 @@ export default function AppointmentBooking() {
                 return (
                   <div key={apt.id} className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-semibold text-gray-900">{doctor?.fio}</p>
                         <p className="text-sm text-gray-600 mt-1">{doctor?.specialty}</p>
                         <p className="text-sm text-gray-600 mt-1">
                           📅 {dayjs(apt.slotDateTime).format("DD.MM.YYYY в HH:mm")}
                         </p>
                         <p className="text-sm text-gray-600">👤 {apt.patientName}</p>
+                        <p className="text-sm text-gray-600">Код: {apt.patientCode}</p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-col">
+                        <button
+                          onClick={() => {
+                            setRescheduleAppointmentId(apt.id);
+                            setShowRescheduleModal(true);
+                          }}
+                          className="btn-secondary text-sm whitespace-nowrap"
+                        >
+                          Перенести
+                        </button>
                         <button
                           onClick={() => {
                             setSelectedAppointmentId(apt.id);
@@ -263,7 +322,7 @@ export default function AppointmentBooking() {
               })}
             </div>
           ) : (
-            <p className="text-gray-600 text-center py-8">У вас нет активных записей</p>
+            <p className="text-gray-600 text-center py-8">Нет активных записей</p>
           )}
         </div>
       )}
@@ -303,6 +362,53 @@ export default function AppointmentBooking() {
                 className="flex-1 btn-danger"
               >
                 Отменить запись
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Modal */}
+      {showRescheduleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Перенести запись</h3>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Новая дата</label>
+                <input
+                  type="date"
+                  value={newScheduleDate}
+                  onChange={(e) => setNewScheduleDate(e.target.value)}
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Новое время</label>
+                <input
+                  type="time"
+                  value={newScheduleTime}
+                  onChange={(e) => setNewScheduleTime(e.target.value)}
+                  className="input-field"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRescheduleModal(false);
+                  setRescheduleAppointmentId(null);
+                  setNewScheduleTime("");
+                }}
+                className="flex-1 btn-secondary"
+              >
+                Закрыть
+              </button>
+              <button
+                onClick={handleRescheduleAppointment}
+                className="flex-1 btn-primary"
+              >
+                Перенести
               </button>
             </div>
           </div>

@@ -1,35 +1,35 @@
 export const DOCTORS = [
   {
     id: "doc-1",
-    fio: "Иван Петрович Сидоров",
+    fio: "Сидоров Иван Петрович",
     specialty: "Терапевт",
     cabinet: "101",
     phone: "+7 (999) 123-45-67"
   },
   {
     id: "doc-2",
-    fio: "Мария Ивановна Петрова",
+    fio: "Петрова Мария Ивановна",
     specialty: "Кардиолог",
     cabinet: "102",
     phone: "+7 (999) 234-56-78"
   },
   {
     id: "doc-3",
-    fio: "Петр Сергеевич Иванов",
+    fio: "Иванов Петр Сергеевич",
     specialty: "Невролог",
     cabinet: "103",
     phone: "+7 (999) 345-67-89"
   },
   {
     id: "doc-4",
-    fio: "Наталья Викторовна Смирнова",
+    fio: "Смирнова Наталья Викторовна",
     specialty: "Дерматолог",
     cabinet: "104",
     phone: "+7 (999) 456-78-90"
   },
   {
     id: "doc-5",
-    fio: "Алексей Николаевич Лебедев",
+    fio: "Лебедев Алексей Николаевич",
     specialty: "Ортопед",
     cabinet: "105",
     phone: "+7 (999) 567-89-01"
@@ -105,7 +105,7 @@ export const APPOINTMENTS = [
     slotDateTime: "2026-03-04 08:00",
     status: "booked",
     patientCode: "PAT-001",
-    patientName: "Анна Сергеевна Федорова",
+    patientName: "Федорова Анна Сергеевна",
     bookedAt: "2026-03-01T10:00:00Z",
     bookedBy: "reg-1"
   },
@@ -115,7 +115,7 @@ export const APPOINTMENTS = [
     slotDateTime: "2026-03-04 09:00",
     status: "booked",
     patientCode: "PAT-002",
-    patientName: "Борис Игоревич Морозов",
+    patientName: "Морозов Борис Игоревич",
     bookedAt: "2026-03-01T11:00:00Z",
     bookedBy: "reg-1"
   },
@@ -125,7 +125,7 @@ export const APPOINTMENTS = [
     slotDateTime: "2026-03-04 09:00",
     status: "completed",
     patientCode: "PAT-003",
-    patientName: "Валерия Дмитриевна Козлова",
+    patientName: "Козлова Валерия Дмитриевна",
     bookedAt: "2026-02-28T14:00:00Z",
     bookedBy: "reg-1"
   }
@@ -134,17 +134,17 @@ export const APPOINTMENTS = [
 export const PATIENTS = [
   {
     patientCode: "PAT-001",
-    fio: "Анна Сергеевна Федорова",
+    fio: "Федорова Анна Сергеевна",
     birthYear: 1985
   },
   {
     patientCode: "PAT-002",
-    fio: "Борис Игоревич Морозов",
+    fio: "Моро��ов Борис Игоревич",
     birthYear: 1990
   },
   {
     patientCode: "PAT-003",
-    fio: "Валерия Дмитриевна Козлова",
+    fio: "Козлова Валерия Дмитриевна",
     birthYear: 1988
   }
 ];

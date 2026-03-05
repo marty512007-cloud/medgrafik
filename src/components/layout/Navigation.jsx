@@ -16,8 +16,8 @@ export default function Navigation({ open, setOpen }) {
   const navigationLinks = [
     { path: "/dashboard", label: "Дашборд", icon: "📊", roles: ["admin", "registrar", "doctor"] },
     { path: "/schedule", label: "Расписание", icon: "📅", roles: ["admin", "doctor"] },
-    { path: "/appointments", label: "Записи", icon: "📋", roles: ["admin", "registrar", "patient"] },
-    { path: "/reports", label: "Отчёты", icon: "📈", roles: ["admin", "registrar", "doctor"] },
+    { path: "/appointments", label: "Записи", icon: "📋", roles: ["admin", "registrar"] },
+    { path: "/reports", label: "Отчёты", icon: "📈", roles: ["admin"] }, // ← ТОЛЬКО АДМИН
     { path: "/doctors", label: "Врачи", icon: "👨‍⚕️", roles: ["admin"] }
   ];
 
@@ -64,7 +64,11 @@ export default function Navigation({ open, setOpen }) {
         {open && (
           <div className="text-sm">
             <p className="font-semibold text-gray-900">{user?.name}</p>
-            <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+            <p className="text-xs text-gray-500 capitalize">
+              {user?.role === "admin" ? "Администратор" :
+               user?.role === "doctor" ? "Врач" :
+               user?.role === "registrar" ? "Регистратор" : user?.role}
+            </p>
           </div>
         )}
         <button

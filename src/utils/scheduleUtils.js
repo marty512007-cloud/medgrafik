@@ -83,7 +83,7 @@ export function validateAppointment(doctors, workSlots, appointments, doctorId, 
   const slotErrors = validateSlot(workSlots, doctorId, slotDateTime);
   errors.push(...slotErrors);
 
-  // 3. Проверка двойного б��онирования (уникальность слота)
+  // 3. Проверка двойного бронирования (уникальность слота)
   const existingBooking = appointments.find(
     a => a.doctorId === doctorId && a.slotDateTime === slotDateTime && a.status === "booked"
   );
@@ -130,6 +130,7 @@ export function calculateUtilization(workSlots, appointments) {
 
 /**
  * Получение утилизации по врачам
+ * 🔴 ИСПРАВЛЕНО: Используем полное ФИО из объекта doctor (которое правильное)
  */
 export function getUtilizationByDoctor(doctors, workSlots, appointments, dateFrom, dateTo) {
   return doctors.map(doctor => {
@@ -148,9 +149,10 @@ export function getUtilizationByDoctor(doctors, workSlots, appointments, dateFro
       return slotDate >= dateFrom && slotDate <= dateTo;
     }).length;
 
+    // 🔴 ИСПРАВЛЕНО: Берем ФИО из объекта doctor, а не из appointments
     return {
       doctorId: doctor.id,
-      doctorName: doctor.fio,
+      doctorName: doctor.fio, // ← ИСПОЛЬЗУЕМ ПРАВИЛЬНОЕ ФИО ИЗ doctor.fio
       specialty: doctor.specialty,
       totalSlots,
       bookedSlots,
@@ -183,8 +185,8 @@ export function getUtilizationByDate(workSlots, appointments, dateFrom, dateTo) 
       return slotDate === dateStr && a.status === "booked";
     }).length;
 
-    // 🇷🇺 Используем русское название дня недели
-    const dayName = current.format("dddd"); // Теперь будет на русском!
+    // Используем русское название дня недели
+    const dayName = current.format("dddd");
 
     dates[dateStr] = {
       date: dateStr,

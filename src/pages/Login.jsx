@@ -29,8 +29,7 @@ export default function Login() {
   const testAccounts = [
     { email: "admin@med.ru", password: "admin", role: "Администратор" },
     { email: "doc@med.ru", password: "doc", role: "Врач" },
-    { email: "reg@med.ru", password: "reg", role: "Регистратор" },
-    { email: "patient@med.ru", password: "patient", role: "Пациент" }
+    { email: "reg@med.ru", password: "reg", role: "Регистратор" }
   ];
 
   return (
@@ -39,7 +38,7 @@ export default function Login() {
         {/* Logo Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-primary-600 rounded-2xl mb-4">
-            <span className="text-4xl">📅</span>
+            <span className="text-4xl">🏥</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">МедГрафик</h1>
           <p className="text-gray-600 mt-2">Система управления медицинским расписанием</p>
@@ -101,9 +100,9 @@ export default function Login() {
           </button>
 
           <p className="text-center text-sm text-gray-600 mt-4">
-            Нет аккаунта?{" "}
+            Нет доступа?{" "}
             <a href="#" className="text-primary-600 hover:text-primary-700 font-semibold">
-              Зарегистрироваться
+              Обратитесь в поддержку
             </a>
           </p>
         </form>

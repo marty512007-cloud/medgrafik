@@ -58,12 +58,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (email, password) => {
-    // Валидация тестовых учетных данных
+    // Валидация тестовых учетных данных (БЕЗ ПАЦИЕНТА)
     const testUsers = [
       { email: "admin@med.ru", password: "admin", role: "admin", name: "Администратор" },
       { email: "doc@med.ru", password: "doc", role: "doctor", name: "Иван Петров" },
-      { email: "reg@med.ru", password: "reg", role: "registrar", name: "Мария Сидорова" },
-      { email: "patient@med.ru", password: "patient", role: "patient", name: "Петр Иванов" }
+      { email: "reg@med.ru", password: "reg", role: "registrar", name: "Мария Сидорова" }
     ];
 
     const user = testUsers.find(u => u.email === email && u.password === password);

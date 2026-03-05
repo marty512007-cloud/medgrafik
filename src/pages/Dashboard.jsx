@@ -1,146 +1,223 @@
 import { useSchedule } from "../context/ScheduleContext";
 import { useAuth } from "../context/AuthContext";
-import { calculateUtilization, getUtilizationByDoctor } from "../utils/scheduleUtils";
 import dayjs from "dayjs";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { getUtilizationByDoctor } from "../utils/scheduleUtils";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import "dayjs/locale/ru";
+
+dayjs.locale("ru");
+
+// 🔴 ФУНКЦИЯ ДЛЯ ИЗВЛЕЧЕНИЯ ФАМИЛИИ
+const extractLastName = (fullName) => {
+  if (!fullName) return "Unknown";
+  const parts = fullName.trim().split(/\s+/);
+  return parts[0]; // Первое слово - это фамилия
+};
 
 export default function Dashboard() {
   const { doctors, workSlots, appointments } = useSchedule();
   const { user } = useAuth();
 
-  const totalUtilization = calculateUtilization(workSlots, appointments);
-  const totalSlots = workSlots.reduce((sum, ws) => sum + ws.slots.length, 0);
-  const totalBooked = appointments.filter(a => a.status === "booked").length;
-  const totalCanceled = appointments.filter(a => a.status === "canceled").length;
-  const totalCompleted = appointments.filter(a => a.status === "completed").length;
-
-  // Данные для графика по дням
+  // Рассчитываем утилизацию за последние 7 дней
   const dateFrom = dayjs().subtract(7, "day").format("YYYY-MM-DD");
   const dateTo = dayjs().format("YYYY-MM-DD");
+  
   const utilizationByDoctor = getUtilizationByDoctor(doctors, workSlots, appointments, dateFrom, dateTo);
 
-  const chartData = utilizationByDoctor.slice(0, 5).map(doc => ({
-    name: doc.doctorName.split(" ")[1],
+  // 🔴 КРИТИЧЕСКОЕ: Преобразуем данные для графика - ТОЛЬКО ФАМИЛИИ
+  const chartData = utilizationByDoctor.map(doc => ({
+    name: extractLastName(doc.doctorName), // ← ТОЛЬКО ФАМИЛИЯ
     utilization: doc.utilization,
     booked: doc.bookedSlots,
     total: doc.totalSlots
   }));
 
-  const statCards = [
-    { label: "Общая утилизация", value: `${totalUtilization}%`, color: "bg-blue-50", icon: "📊" },
-    { label: "Слотов всего", value: totalSlots, color: "bg-green-50", icon: "📅" },
-    { label: "Записей (активных)", value: totalBooked, color: "bg-purple-50", icon: "✅" },
-    { label: "Завершено приёмов", value: totalCompleted, color: "bg-emerald-50", icon: "✔️" }
-  ];
+  // Статистика
+  const totalSlots = workSlots.reduce((sum, ws) => sum + ws.slots.length, 0);
+  const bookedAppointments = appointments.filter(a => a.status === "booked").length;
+  const avgUtilization = utilizationByDoctor.length > 0
+    ? Math.round(utilizationByDoctor.reduce((sum, d) => sum + d.utilization, 0) / utilizationByDoctor.length)
+    : 0;
+  const canceledAppointments = appointments.filter(a => a.status === "canceled").length;
+
+  // Приветствие в зависимости от времени
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Доброе утро" : hour < 18 ? "Добрый день" : "Добрый вечер";
+
+  // Перевод роли на русский
+  const roleText = user?.role === "admin" ? "Администратор" :
+                   user?.role === "doctor" ? "Врач" :
+                   user?.role === "registrar" ? "Регистратор" : user?.role;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Дашборд</h1>
-        <p className="text-gray-600 mt-1">Добро пожаловать, {user?.name}!</p>
+      <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-2xl p-6 border border-primary-200">
+        <h1 className="text-3xl font-bold text-gray-900">
+          {greeting}, {user?.name}! 👋
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Вы вошли как <span className="font-semibold text-primary-600">{roleText}</span>
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
+          {dayjs().format("dddd, DD MMMM YYYY")}
+        </p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card, idx) => (
-          <div key={idx} className={`${card.color} card`}>
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">{card.label}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{card.value}</p>
-              </div>
-              <span className="text-2xl">{card.icon}</span>
+        {/* Total Slots */}
+        <div className="card bg-blue-50 border border-blue-200">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">📊 Всего слотов</p>
+              <p className="text-3xl font-bold text-blue-900 mt-3">{totalSlots}</p>
+              <p className="text-xs text-gray-500 mt-2">на {dayjs().add(7, "day").format("DD.MM.YYYY")}</p>
             </div>
+            <div className="text-4xl">📅</div>
           </div>
-        ))}
+        </div>
+
+        {/* Booked Appointments */}
+        <div className="card bg-green-50 border border-green-200">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">✅ Записей</p>
+              <p className="text-3xl font-bold text-green-900 mt-3">{bookedAppointments}</p>
+              <p className="text-xs text-gray-500 mt-2">активных записей</p>
+            </div>
+            <div className="text-4xl">📝</div>
+          </div>
+        </div>
+
+        {/* Average Utilization */}
+        <div className="card bg-purple-50 border border-purple-200">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">📈 Утилизация</p>
+              <p className="text-3xl font-bold text-purple-900 mt-3">{avgUtilization}%</p>
+              <p className="text-xs text-gray-500 mt-2">средняя за 7 дней</p>
+            </div>
+            <div className="text-4xl">📊</div>
+          </div>
+        </div>
+
+        {/* Canceled Appointments */}
+        <div className="card bg-red-50 border border-red-200">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-gray-600 font-medium">❌ Отмены</p>
+              <p className="text-3xl font-bold text-red-900 mt-3">{canceledAppointments}</p>
+              <p className="text-xs text-gray-500 mt-2">отменённых записей</p>
+            </div>
+            <div className="text-4xl">🚫</div>
+          </div>
+        </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Utilization by Doctor */}
-        <div className="card">
-          <h3 className="card-header">Утилизация по врачам (7 дней)</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
+      {/* Chart */}
+      <div className="card">
+        <h3 className="card-header">📈 Утилизация по врачам (7 дней)</h3>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart 
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 0, bottom: 60 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="name" />
+              <XAxis 
+                dataKey="name" 
+                type="category"
+                angle={-45}
+                textAnchor="end"
+                height={100}
+              />
               <YAxis />
-              <Tooltip />
-              <Bar dataKey="utilization" fill="#3b82f6" name="Утилизация %" />
+              <Tooltip 
+                contentStyle={{ backgroundColor: "#fff", border: "1px solid #ccc", borderRadius: "8px" }}
+                cursor={{ fill: "rgba(0,0,0,0.1)" }}
+                formatter={(value) => value}
+              />
+              <Legend />
+              <Bar 
+                dataKey="utilization" 
+                fill="#3b82f6" 
+                name="Утилизация %" 
+                radius={[8, 8, 0, 0]}
+              />
+              <Bar 
+                dataKey="booked" 
+                fill="#10b981" 
+                name="Записей"
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-
-        {/* Appointments by Status */}
-        <div className="card">
-          <h3 className="card-header">Записи по статусам</h3>
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-700">Активные</span>
-                <span className="font-semibold">{totalBooked}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${(totalBooked / (totalBooked + totalCanceled + totalCompleted)) * 100}%` }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-700">Завершено</span>
-                <span className="font-semibold">{totalCompleted}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(totalCompleted / (totalBooked + totalCanceled + totalCompleted)) * 100}%` }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-700">Отменено</span>
-                <span className="font-semibold">{totalCanceled}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-red-500 h-2 rounded-full" style={{ width: `${(totalCanceled / (totalBooked + totalCanceled + totalCompleted)) * 100}%` }}></div>
-              </div>
-            </div>
+        ) : (
+          <div className="text-center py-12 text-gray-600">
+            <p>📭 Нет данных для отображения</p>
+            <p className="text-sm mt-2">Создайте расписание, чтобы увидеть график утилизации</p>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Recent Activity */}
+      {/* Top Doctors */}
       <div className="card">
-        <h3 className="card-header">Топ врачей по утилизации</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-gray-700 font-semibold">ФИО</th>
-                <th className="text-left py-3 px-4 text-gray-700 font-semibold">Специальность</th>
-                <th className="text-center py-3 px-4 text-gray-700 font-semibold">Слотов</th>
-                <th className="text-center py-3 px-4 text-gray-700 font-semibold">Записей</th>
-                <th className="text-center py-3 px-4 text-gray-700 font-semibold">Утилизация</th>
-              </tr>
-            </thead>
-            <tbody>
-              {utilizationByDoctor.slice(0, 5).map(doc => (
-                <tr key={doc.doctorId} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium text-gray-900">{doc.doctorName}</td>
-                  <td className="py-3 px-4 text-gray-600">{doc.specialty}</td>
-                  <td className="py-3 px-4 text-center text-gray-900 font-semibold">{doc.totalSlots}</td>
-                  <td className="py-3 px-4 text-center text-gray-900 font-semibold">{doc.bookedSlots}</td>
-                  <td className="py-3 px-4 text-center">
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                      doc.utilization >= 80 ? "bg-green-100 text-green-800" :
-                      doc.utilization >= 60 ? "bg-yellow-100 text-yellow-800" :
-                      "bg-red-100 text-red-800"
-                    }`}>
-                      {doc.utilization}%
-                    </span>
-                  </td>
-                </tr>
+        <h3 className="card-header">🏆 Лучшие врачи по утилизации</h3>
+        {utilizationByDoctor.length > 0 ? (
+          <div className="space-y-3">
+            {utilizationByDoctor
+              .sort((a, b) => b.utilization - a.utilization)
+              .slice(0, 5)
+              .map((doc, idx) => (
+                <div key={doc.doctorId} className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                        {idx + 1}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{doc.doctorName}</p>
+                        <p className="text-sm text-gray-600">{doc.specialty}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-2xl font-bold ${
+                        doc.utilization >= 80 ? "text-green-600" :
+                        doc.utilization >= 60 ? "text-yellow-600" :
+                        "text-red-600"
+                      }`}>
+                        {doc.utilization}%
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {doc.bookedSlots}/{doc.totalSlots} слотов
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+          </div>
+        ) : (
+          <p className="text-gray-600 text-center py-8">📭 Нет данных</p>
+        )}
+      </div>
+
+      {/* System Info */}
+      <div className="card bg-gray-50">
+        <h3 className="font-bold text-gray-900 mb-3">ℹ️ Информация о системе</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <p className="text-gray-600">👥 Врачей в системе</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{doctors.length}</p>
+          </div>
+          <div>
+            <p className="text-gray-600">📅 Расписаний создано</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{workSlots.length}</p>
+          </div>
+          <div>
+            <p className="text-gray-600">📝 Всего записей</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{appointments.length}</p>
+          </div>
         </div>
       </div>
     </div>

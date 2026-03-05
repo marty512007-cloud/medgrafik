@@ -1,12 +1,23 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSchedule } from "../context/ScheduleContext";
 import dayjs from "dayjs";
 import { getUtilizationByDoctor, getUtilizationByDate } from "../utils/scheduleUtils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
+import "dayjs/locale/ru";
+
+dayjs.locale("ru");
+
+// 🔴 ФУНКЦИЯ ДЛЯ ИЗВЛЕЧЕНИЯ ФАМИЛИИ
+const extractLastName = (fullName) => {
+  if (!fullName) return "Unknown";
+  const parts = fullName.trim().split(/\s+/);
+  console.log(`Full name: "${fullName}" -> Last name: "${parts[0]}"`); // DEBUG
+  return parts[0]; // Первое слово - это фамилия
+};
 
 export default function Reports() {
   const { doctors, workSlots, appointments } = useSchedule();
-  const [reportType, setReportType] = useState("by-doctor"); // by-doctor, by-date
+  const [reportType, setReportType] = useState("by-doctor");
   const [dateFrom, setDateFrom] = useState(dayjs().subtract(7, "day").format("YYYY-MM-DD"));
   const [dateTo, setDateTo] = useState(dayjs().format("YYYY-MM-DD"));
   const [selectedSpecialty, setSelectedSpecialty] = useState("all");
@@ -23,25 +34,40 @@ export default function Reports() {
   const utilizationByDoctor = getUtilizationByDoctor(doctors, workSlots, appointments, dateFrom, dateTo);
   const utilizationByDate = getUtilizationByDate(workSlots, appointments, dateFrom, dateTo);
 
-  const filteredDoctors = selectedSpecialty === "all"
-    ? utilizationByDoctor
-    : utilizationByDoctor.filter(d => d.specialty === selectedSpecialty);
+  const filteredDoctors = useMemo(() => {
+    return selectedSpecialty === "all"
+      ? utilizationByDoctor
+      : utilizationByDoctor.filter(d => d.specialty === selectedSpecialty);
+  }, [utilizationByDoctor, selectedSpecialty]);
 
   const uniqueSpecialties = [...new Set(doctors.map(d => d.specialty))];
 
-  const chartDataByDoctor = filteredDoctors.map(doc => ({
-    name: doc.doctorName.split(" ")[1] || doc.doctorName,
-    utilization: doc.utilization,
-    booked: doc.bookedSlots,
-    total: doc.totalSlots
-  }));
+  // 🔴 ВАЖНО: Используем useMemo для кеширования преобразованных данных
+  const chartDataByDoctor = useMemo(() => {
+    return filteredDoctors.map((doc, index) => {
+      const surname = extractLastName(doc.doctorName);
+      return {
+        key: `${doc.doctorId}-${index}`,
+        name: surname,
+        fullName: doc.doctorName,
+        utilization: doc.utilization,
+        booked: doc.bookedSlots,
+        total: doc.totalSlots,
+        specialty: doc.specialty
+      };
+    });
+  }, [filteredDoctors]);
 
-  const chartDataByDate = utilizationByDate.map(d => ({
-    date: dayjs(d.date).format("DD.MM"),
-    utilization: d.utilization,
-    booked: d.bookedSlots,
-    total: d.totalSlots
-  }));
+  const chartDataByDate = useMemo(() => {
+    return utilizationByDate.map(d => ({
+      date: dayjs(d.date).format("DD.MM"),
+      utilization: d.utilization,
+      booked: d.bookedSlots,
+      total: d.totalSlots
+    }));
+  }, [utilizationByDate]);
+
+  console.log("📊 Chart data by doctor:", chartDataByDoctor); // DEBUG
 
   const handleExportCSV = () => {
     let csv = "Врач,Специальность,Слотов всего,Записей,Отмены,Завершено,Утилизация %\n";
@@ -53,7 +79,6 @@ export default function Reports() {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     if (navigator.msSaveBlob) {
-      // IE 10+
       navigator.msSaveBlob(blob, `report_${dateFrom}_${dateTo}.csv`);
     } else {
       link.href = URL.createObjectURL(blob);
@@ -134,6 +159,7 @@ export default function Reports() {
         </button>
       </div>
 
+
       {/* Chart */}
       <div className="card">
         <h3 className="card-header">
@@ -141,34 +167,62 @@ export default function Reports() {
         </h3>
         
         {(reportType === "by-doctor" ? chartDataByDoctor : chartDataByDate).length > 0 ? (
-          <ResponsiveContainer width="100%" height={400}>
-            {reportType === "by-doctor" ? (
-              <BarChart data={chartDataByDoctor}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #ccc" }}
-                  formatter={(value) => value}
-                />
-                <Legend />
-                <Bar dataKey="utilization" fill="#3b82f6" name="Утилизация %" />
-                <Bar dataKey="booked" fill="#10b981" name="Записей" />
-              </BarChart>
-            ) : (
-              <LineChart data={chartDataByDate}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "#fff", border: "1px solid #ccc" }}
-                  formatter={(value) => value}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="utilization" stroke="#3b82f6" strokeWidth={2} name="Утилизация %" />
-              </LineChart>
-            )}
-          </ResponsiveContainer>
+          <div key={`chart-${reportType}-${dateFrom}-${dateTo}`}>
+            <ResponsiveContainer width="100%" height={400}>
+              {reportType === "by-doctor" ? (
+                <BarChart 
+                  data={chartDataByDoctor}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    dataKey="name" 
+                    type="category"
+                  />
+                  <YAxis />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #ccc", borderRadius: "8px" }}
+                    cursor={{ fill: "rgba(0,0,0,0.1)" }}
+                    formatter={(value) => value}
+                    labelFormatter={(label) => `Фамилия: ${label}`}
+                  />
+                  <Legend />
+                  <Bar 
+                    dataKey="utilization" 
+                    fill="#3b82f6" 
+                    name="Утилизация %" 
+                    radius={[8, 8, 0, 0]}
+                  />
+                  <Bar 
+                    dataKey="booked" 
+                    fill="#10b981" 
+                    name="Записей"
+                    radius={[8, 8, 0, 0]}
+                  />
+                </BarChart>
+              ) : (
+                <LineChart data={chartDataByDate}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #ccc", borderRadius: "8px" }}
+                    formatter={(value) => value}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="utilization" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2} 
+                    name="Утилизация %" 
+                    dot={{ fill: "#3b82f6", r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              )}
+            </ResponsiveContainer>
+          </div>
         ) : (
           <div className="text-center py-12 text-gray-600">
             <p>Нет данных для отображения графика</p>
@@ -282,25 +336,6 @@ export default function Reports() {
               : 0
             }%
           </p>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="card bg-gray-50">
-        <h3 className="font-bold text-gray-900 mb-3">📌 Легенда утилизации</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">80%+</div>
-            <span className="text-gray-700">Высокая утилизация</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-semibold">60-79%</div>
-            <span className="text-gray-700">Средняя утилизация</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-semibold">&lt;60%</div>
-            <span className="text-gray-700">Низкая утилизация</span>
-          </div>
         </div>
       </div>
     </div>
