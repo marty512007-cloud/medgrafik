@@ -61,7 +61,7 @@ export function AuthProvider({ children }) {
     // Валидация тестовых учетных данных (БЕЗ ПАЦИЕНТА)
     const testUsers = [
       { email: "admin@med.ru", password: "admin", role: "admin", name: "Администратор" },
-      { email: "doc@med.ru", password: "doc", role: "doctor", name: "Иван Петров" },
+      { email: "doc@med.ru", password: "doc", role: "doctor", name: "Иван Петров", doctorId: "doc-1" },
       { email: "reg@med.ru", password: "reg", role: "registrar", name: "Мария Сидорова" }
     ];
 
@@ -72,7 +72,8 @@ export function AuthProvider({ children }) {
         id: Math.random().toString(36).substr(2, 9),
         email: user.email,
         role: user.role,
-        name: user.name
+        name: user.name,
+        ...(user.doctorId && { doctorId: user.doctorId })
       };
       localStorage.setItem("user", JSON.stringify(userData));
       dispatch({ type: "LOGIN", payload: userData });

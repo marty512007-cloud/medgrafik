@@ -7,11 +7,9 @@ import "dayjs/locale/ru";
 
 dayjs.locale("ru");
 
-// 🔴 ФУНКЦИЯ ДЛЯ ИЗВЛЕЧЕНИЯ ФАМИЛИИ
 const extractLastName = (fullName) => {
   if (!fullName) return "Unknown";
   const parts = fullName.trim().split(/\s+/);
-  console.log(`Full name: "${fullName}" -> Last name: "${parts[0]}"`); // DEBUG
   return parts[0]; // Первое слово - это фамилия
 };
 
@@ -67,8 +65,6 @@ export default function Reports() {
     }));
   }, [utilizationByDate]);
 
-  console.log("📊 Chart data by doctor:", chartDataByDoctor); // DEBUG
-
   const handleExportCSV = () => {
     let csv = "Врач,Специальность,Слотов всего,Записей,Отмены,Завершено,Утилизация %\n";
 
@@ -76,7 +72,8 @@ export default function Reports() {
       csv += `"${doc.doctorName}","${doc.specialty}",${doc.totalSlots},${doc.bookedSlots},${doc.canceledSlots},${doc.completedSlots},${doc.utilization}\n`;
     });
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     if (navigator.msSaveBlob) {
       navigator.msSaveBlob(blob, `report_${dateFrom}_${dateTo}.csv`);
