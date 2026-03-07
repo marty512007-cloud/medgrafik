@@ -60,7 +60,7 @@ export default function DoctorSchedule() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Расписание врача</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Расписание врача</h1>
         <p className="text-gray-600 mt-1">Просмотр и управление слотами приёма</p>
       </div>
 
@@ -97,9 +97,9 @@ export default function DoctorSchedule() {
             <div className="flex gap-2">
               <button
                 onClick={() => setViewMode("day")}
-                className={`flex-1 px-4 py-2 rounded-xl font-medium transition-colors ${
+                className={`flex-1 px-4 py-2 font-medium transition-colors text-sm ${
                   viewMode === "day"
-                    ? "bg-primary-600 text-white"
+                    ? "bg-gray-800 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -107,9 +107,9 @@ export default function DoctorSchedule() {
               </button>
               <button
                 onClick={() => setViewMode("week")}
-                className={`flex-1 px-4 py-2 rounded-xl font-medium transition-colors ${
+                className={`flex-1 px-4 py-2 font-medium transition-colors text-sm ${
                   viewMode === "week"
-                    ? "bg-primary-600 text-white"
+                    ? "bg-gray-800 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -122,19 +122,19 @@ export default function DoctorSchedule() {
 
       {/* Doctor Info */}
       {selectedDoctor && (
-        <div className="card bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-200">
+        <div className="card bg-gray-50 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900">{selectedDoctor.fio}</h3>
+              <h3 className="text-xl font-semibold text-gray-900">{selectedDoctor.fio}</h3>
               <p className="text-gray-600 mt-1">
-                <span className="mr-4">🏥 {selectedDoctor.specialty}</span>
-                <span className="mr-4">🚪 Кабинет {selectedDoctor.cabinet}</span>
-                <span>📞 {selectedDoctor.phone}</span>
+                <span className="mr-4">{selectedDoctor.specialty}</span>
+                <span className="mr-4">Кабинет {selectedDoctor.cabinet}</span>
+                <span>{selectedDoctor.phone}</span>
               </p>
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600">Доступных слотов</p>
-              <p className="text-3xl font-bold text-primary-600">{slots.length}</p>
+              <p className="text-3xl font-bold text-gray-900">{slots.length}</p>
             </div>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function DoctorSchedule() {
           
           {slots.length > 0 ? (
             <div>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 mb-6">
                 {slots.map((slot, idx) => {
                   const appointment = getAppointmentInfo(slot.dateTime);
                   const isBooked = appointment && appointment.status === "booked";
@@ -157,20 +157,20 @@ export default function DoctorSchedule() {
                   return (
                     <div
                       key={idx}
-                      className={`p-4 rounded-xl text-center font-semibold cursor-pointer transition-all hover:shadow-lg ${
+                      className={`p-3 text-center font-medium cursor-pointer transition-colors border ${
                         isBooked
-                          ? "bg-red-100 text-red-800 border-2 border-red-300"
+                          ? "bg-gray-200 text-gray-700 border-gray-400"
                           : isCompleted
-                          ? "bg-green-100 text-green-800 border-2 border-green-300"
+                          ? "bg-gray-100 text-gray-600 border-gray-300"
                           : isCanceled
-                          ? "bg-gray-100 text-gray-500 border-2 border-gray-300 line-through"
-                          : "bg-green-100 text-green-800 border-2 border-green-300 hover:scale-105"
+                          ? "bg-white text-gray-400 border-gray-200 line-through"
+                          : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
                       }`}
                       title={appointment ? appointment.patientName : "Свободный слот"}
                     >
-                      <p className="text-lg">{slot.dateTime.split(" ")[1]}</p>
+                      <p className="text-base">{slot.dateTime.split(" ")[1]}</p>
                       <p className="text-xs mt-1">
-                        {isBooked ? "Занято" : isCompleted ? "✓ Завершено" : isCanceled ? "Отменено" : "Свободно"}
+                        {isBooked ? "Занято" : isCompleted ? "Завершено" : isCanceled ? "Отменено" : "Свободно"}
                       </p>
                       {appointment && (
                         <p className="text-xs mt-1 truncate">{appointment.patientName.split(" ")[0]}</p>
@@ -182,21 +182,21 @@ export default function DoctorSchedule() {
 
               {/* Scheduled Appointments for This Day */}
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="font-bold text-gray-900 mb-3">Записанные пациенты</h4>
+                <h4 className="font-semibold text-gray-900 mb-3">Записанные пациенты</h4>
                 <div className="space-y-2">
                   {slots.map((slot, idx) => {
                     const appointment = getAppointmentInfo(slot.dateTime);
                     if (!appointment || appointment.status !== "booked") return null;
 
                     return (
-                      <div key={idx} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <div key={idx} className="p-3 bg-gray-50 border border-gray-200">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-semibold text-gray-900">{slot.dateTime.split(" ")[1]}</p>
+                            <p className="font-medium text-gray-900">{slot.dateTime.split(" ")[1]}</p>
                             <p className="text-sm text-gray-700">{appointment.patientName}</p>
-                            <p className="text-xs text-gray-600">Код: {appointment.patientCode}</p>
+                            <p className="text-xs text-gray-500">Код: {appointment.patientCode}</p>
                           </div>
-                          <span className="px-2 py-1 bg-red-200 text-red-800 text-xs rounded font-semibold">
+                          <span className="px-2 py-1 bg-gray-200 text-gray-700 text-xs font-medium">
                             Записан
                           </span>
                         </div>
@@ -208,7 +208,7 @@ export default function DoctorSchedule() {
             </div>
           ) : (
             <div className="text-center py-12 text-gray-600">
-              <p className="text-lg">📅 Нет расписания на эту дату</p>
+              <p className="text-base">Нет расписания на эту дату</p>
               <p className="text-sm mt-2">Обратитесь к администратору для создания расписания</p>
             </div>
           )}
@@ -220,16 +220,16 @@ export default function DoctorSchedule() {
         <div className="card overflow-x-auto">
           <h3 className="card-header mb-4">Расписание на неделю</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-4 min-w-full">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-3 min-w-full">
             {weekDays.map((day, dayIdx) => {
               const dateStr = day.format("YYYY-MM-DD");
               const daySlots = weekSlots[dateStr] || [];
 
               return (
-                <div key={dayIdx} className="border border-gray-200 rounded-xl p-4 bg-white">
+                <div key={dayIdx} className="border border-gray-200 p-3 bg-white">
                   {/* Day Header */}
-                  <div className="text-center mb-4 pb-4 border-b border-gray-200">
-                    <p className="font-bold text-gray-900">
+                  <div className="text-center mb-3 pb-3 border-b border-gray-200">
+                    <p className="font-semibold text-gray-900">
                       {day.format("DD")}
                     </p>
                     <p className="text-sm text-gray-600">
@@ -239,7 +239,7 @@ export default function DoctorSchedule() {
 
                   {/* Time Slots */}
                   {daySlots.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {daySlots.map((slot, slotIdx) => {
                         const appointment = getAppointmentInfo(slot.dateTime);
                         const isBooked = appointment && appointment.status === "booked";
@@ -248,12 +248,12 @@ export default function DoctorSchedule() {
                         return (
                           <div
                             key={slotIdx}
-                            className={`p-2 rounded text-center text-xs font-semibold cursor-pointer transition-all ${
+                            className={`p-1 text-center text-xs font-medium cursor-pointer border ${
                               isBooked
-                                ? "bg-red-100 text-red-800"
+                                ? "bg-gray-200 text-gray-700 border-gray-300"
                                 : isCompleted
-                                ? "bg-green-100 text-green-800"
-                                : "bg-green-100 text-green-800 hover:shadow"
+                                ? "bg-gray-100 text-gray-600 border-gray-200"
+                                : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                             }`}
                             title={appointment ? appointment.patientName : "Свободно"}
                           >
@@ -274,17 +274,17 @@ export default function DoctorSchedule() {
           </div>
 
           {/* Legend */}
-          <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap gap-4">
+          <div className="mt-6 pt-4 border-t border-gray-200 flex flex-wrap gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
+              <div className="w-4 h-4 bg-white border border-gray-300"></div>
               <span className="text-sm text-gray-700">Свободный слот</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+              <div className="w-4 h-4 bg-gray-200 border border-gray-300"></div>
               <span className="text-sm text-gray-700">Занято</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border-2 border-green-500 rounded"></div>
+              <div className="w-4 h-4 bg-gray-100 border border-gray-200"></div>
               <span className="text-sm text-gray-700">Завершено</span>
             </div>
           </div>
@@ -293,14 +293,14 @@ export default function DoctorSchedule() {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card bg-blue-50 border border-blue-200">
-          <p className="text-sm text-gray-600">📊 Всего слотов</p>
-          <p className="text-3xl font-bold text-blue-900 mt-2">{slots.length}</p>
+        <div className="card">
+          <p className="text-sm text-gray-600">Всего слотов</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">{slots.length}</p>
         </div>
 
-        <div className="card bg-red-50 border border-red-200">
-          <p className="text-sm text-gray-600">🔴 Занято</p>
-          <p className="text-3xl font-bold text-red-900 mt-2">
+        <div className="card">
+          <p className="text-sm text-gray-600">Занято</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">
             {slots.filter(slot => {
               const apt = getAppointmentInfo(slot.dateTime);
               return apt && apt.status === "booked";
@@ -308,9 +308,9 @@ export default function DoctorSchedule() {
           </p>
         </div>
 
-        <div className="card bg-green-50 border border-green-200">
-          <p className="text-sm text-gray-600">✅ Свободно</p>
-          <p className="text-3xl font-bold text-green-900 mt-2">
+        <div className="card">
+          <p className="text-sm text-gray-600">Свободно</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">
             {slots.filter(slot => {
               const apt = getAppointmentInfo(slot.dateTime);
               return !apt || apt.status !== "booked";

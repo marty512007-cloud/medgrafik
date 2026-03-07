@@ -33,23 +33,20 @@ export default function Login() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary-600 rounded-2xl mb-4">
-            <span className="text-4xl">🏥</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">МедГрафик</h1>
+          <h1 className="text-3xl font-semibold text-gray-900">МедГрафик</h1>
           <p className="text-gray-600 mt-2">Система управления медицинским расписанием</p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="card mb-6">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900">Вход в систему</h2>
+        <form onSubmit={handleLogin} className="card mb-4">
+          <h2 className="text-xl font-semibold mb-6 text-gray-900">Вход в систему</h2>
 
           {error && (
-            <div className="p-4 mb-4 bg-danger-50 border border-danger-200 rounded-xl text-danger-700 text-sm">
+            <div className="p-3 mb-4 bg-gray-100 border border-gray-400 text-gray-800 text-sm">
               {error}
             </div>
           )}
@@ -76,7 +73,7 @@ export default function Login() {
               className="input-field"
               required
             />
-            <a href="#" className="text-xs text-primary-600 hover:text-primary-700 mt-2 inline-block">
+            <a href="#" className="text-xs text-gray-600 hover:text-gray-900 mt-2 inline-block">
               Забыли пароль?
             </a>
           </div>
@@ -84,35 +81,25 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full btn-primary py-3 text-lg font-semibold flex items-center justify-center gap-2"
+            className="w-full btn-primary py-3 text-base"
           >
-            {loading ? (
-              <>
-                <span className="animate-spin">⏳</span>
-                Загрузка...
-              </>
-            ) : (
-              <>
-                Войти
-                <span>→</span>
-              </>
-            )}
+            {loading ? "Загрузка..." : "Войти"}
           </button>
 
           <p className="text-center text-sm text-gray-600 mt-4">
             Нет доступа?{" "}
-            <a href="#" className="text-primary-600 hover:text-primary-700 font-semibold">
+            <a href="#" className="text-gray-900 hover:underline font-medium">
               Обратитесь в поддержку
             </a>
           </p>
         </form>
 
         {/* Test Credentials */}
-        <div className="card bg-gray-50 border border-gray-200">
+        <div className="card border border-gray-200">
           <p className="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">
             Тестовые учетные данные
           </p>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {testAccounts.map((acc, idx) => (
               <button
                 key={idx}
@@ -120,10 +107,10 @@ export default function Login() {
                   setEmail(acc.email);
                   setPassword(acc.password);
                 }}
-                className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white transition-colors"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors"
               >
                 <p className="font-medium text-gray-900">{acc.role}</p>
-                <p className="text-xs text-gray-600">{acc.email} / {acc.password}</p>
+                <p className="text-xs text-gray-500">{acc.email} / {acc.password}</p>
               </button>
             ))}
           </div>

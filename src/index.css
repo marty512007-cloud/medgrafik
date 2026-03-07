@@ -14,6 +14,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f9fafb;
+  color: #111827;
 }
 
 html {
@@ -22,26 +24,26 @@ html {
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50;
+    @apply px-4 py-2 bg-gray-800 text-white font-medium hover:bg-gray-900 transition-colors disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-300 transition-colors;
+    @apply px-4 py-2 bg-white text-gray-800 border border-gray-300 font-medium hover:bg-gray-100 transition-colors;
   }
 
   .btn-danger {
-    @apply px-4 py-2 bg-danger-500 text-white rounded-xl font-semibold hover:bg-danger-600 transition-colors;
+    @apply px-4 py-2 bg-gray-700 text-white font-medium hover:bg-gray-800 transition-colors;
   }
 
   .input-field {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500;
+    @apply w-full px-4 py-2 border border-gray-300 bg-white focus:outline-none focus:border-gray-600;
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow;
+    @apply bg-white border border-gray-200 p-6;
   }
 
   .card-header {
-    @apply text-xl font-bold text-gray-900 mb-4;
+    @apply text-xl font-semibold text-gray-900 mb-4;
   }
 }

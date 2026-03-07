@@ -94,7 +94,7 @@ export default function Reports() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">📊 Отчёты и аналитика</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Отчёты и аналитика</h1>
         <p className="text-gray-600 mt-1">Анализ утилизации расписания и загрузки врачей</p>
       </div>
 
@@ -155,7 +155,7 @@ export default function Reports() {
           onClick={handleExportCSV}
           className="mt-4 btn-primary"
         >
-          📥 Экспортировать CSV
+          Экспортировать CSV
         </button>
       </div>
 
@@ -163,7 +163,7 @@ export default function Reports() {
       {/* Chart */}
       <div className="card">
         <h3 className="card-header">
-          {reportType === "by-doctor" ? "📈 Утилизация по врачам" : "📈 Утилизация по датам"}
+          {reportType === "by-doctor" ? "Утилизация по врачам" : "Утилизация по датам"}
         </h3>
         
         {(reportType === "by-doctor" ? chartDataByDoctor : chartDataByDate).length > 0 ? (
@@ -181,23 +181,23 @@ export default function Reports() {
                   />
                   <YAxis />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #ccc", borderRadius: "8px" }}
-                    cursor={{ fill: "rgba(0,0,0,0.1)" }}
+                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #d1d5db" }}
+                    cursor={{ fill: "rgba(0,0,0,0.05)" }}
                     formatter={(value) => value}
                     labelFormatter={(label) => `Фамилия: ${label}`}
                   />
                   <Legend />
                   <Bar 
                     dataKey="utilization" 
-                    fill="#3b82f6" 
+                    fill="#374151" 
                     name="Утилизация %" 
-                    radius={[8, 8, 0, 0]}
+                    radius={[0, 0, 0, 0]}
                   />
                   <Bar 
                     dataKey="booked" 
-                    fill="#10b981" 
+                    fill="#9ca3af" 
                     name="Записей"
-                    radius={[8, 8, 0, 0]}
+                    radius={[0, 0, 0, 0]}
                   />
                 </BarChart>
               ) : (
@@ -206,18 +206,18 @@ export default function Reports() {
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #ccc", borderRadius: "8px" }}
+                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #d1d5db" }}
                     formatter={(value) => value}
                   />
                   <Legend />
                   <Line 
                     type="monotone" 
                     dataKey="utilization" 
-                    stroke="#3b82f6" 
+                    stroke="#374151" 
                     strokeWidth={2} 
                     name="Утилизация %" 
-                    dot={{ fill: "#3b82f6", r: 4 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ fill: "#374151", r: 3 }}
+                    activeDot={{ r: 5 }}
                   />
                 </LineChart>
               )}
@@ -232,13 +232,13 @@ export default function Reports() {
 
       {/* Table */}
       <div className="card">
-        <h3 className="card-header">📋 Детали отчёта</h3>
+        <h3 className="card-header">Детали отчёта</h3>
         
         {(reportType === "by-doctor" ? filteredDoctors : utilizationByDate).length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
+                <tr className="border-b border-gray-300 bg-gray-50">
                   {reportType === "by-doctor" ? (
                     <>
                       <th className="text-left py-3 px-4 text-gray-700 font-semibold">ФИО врача</th>
@@ -272,11 +272,7 @@ export default function Reports() {
                       <td className="py-3 px-4 text-center text-gray-600">{doc.canceledSlots}</td>
                       <td className="py-3 px-4 text-center text-gray-600">{doc.completedSlots}</td>
                       <td className="py-3 px-4 text-center">
-                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                          doc.utilization >= 80 ? "bg-green-100 text-green-800" :
-                          doc.utilization >= 60 ? "bg-yellow-100 text-yellow-800" :
-                          "bg-red-100 text-red-800"
-                        }`}>
+                        <span className="inline-block px-3 py-1 bg-gray-100 border border-gray-300 text-sm font-medium text-gray-800">
                           {doc.utilization}%
                         </span>
                       </td>
@@ -290,11 +286,7 @@ export default function Reports() {
                       <td className="py-3 px-4 text-center text-gray-900 font-semibold">{d.totalSlots}</td>
                       <td className="py-3 px-4 text-center text-gray-900 font-semibold">{d.bookedSlots}</td>
                       <td className="py-3 px-4 text-center">
-                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                          d.utilization >= 80 ? "bg-green-100 text-green-800" :
-                          d.utilization >= 60 ? "bg-yellow-100 text-yellow-800" :
-                          "bg-red-100 text-red-800"
-                        }`}>
+                        <span className="inline-block px-3 py-1 bg-gray-100 border border-gray-300 text-sm font-medium text-gray-800">
                           {d.utilization}%
                         </span>
                       </td>
@@ -306,7 +298,7 @@ export default function Reports() {
           </div>
         ) : (
           <div className="text-center py-12 text-gray-600">
-            <p>📭 Нет данных для отображения в таблице</p>
+            <p>Нет данных для отображения в таблице</p>
             <p className="text-sm mt-2">Создайте расписание и записи, чтобы увидеть отчёт</p>
           </div>
         )}
@@ -314,23 +306,23 @@ export default function Reports() {
 
       {/* Summary Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card bg-blue-50 border border-blue-200">
-          <p className="text-sm text-gray-600 font-medium">📊 Всего слотов</p>
-          <p className="text-3xl font-bold text-blue-900 mt-3">
+        <div className="card">
+          <p className="text-sm text-gray-600 font-medium">Всего слотов</p>
+          <p className="text-3xl font-bold text-gray-900 mt-3">
             {workSlots.reduce((sum, ws) => sum + ws.slots.length, 0)}
           </p>
         </div>
 
-        <div className="card bg-green-50 border border-green-200">
-          <p className="text-sm text-gray-600 font-medium">✅ Записей</p>
-          <p className="text-3xl font-bold text-green-900 mt-3">
+        <div className="card">
+          <p className="text-sm text-gray-600 font-medium">Записей</p>
+          <p className="text-3xl font-bold text-gray-900 mt-3">
             {appointments.filter(a => a.status === "booked").length}
           </p>
         </div>
 
-        <div className="card bg-purple-50 border border-purple-200">
-          <p className="text-sm text-gray-600 font-medium">📈 Средняя утилизация</p>
-          <p className="text-3xl font-bold text-purple-900 mt-3">
+        <div className="card">
+          <p className="text-sm text-gray-600 font-medium">Средняя утилизация</p>
+          <p className="text-3xl font-bold text-gray-900 mt-3">
             {utilizationByDoctor.length > 0 
               ? Math.round(utilizationByDoctor.reduce((sum, d) => sum + d.utilization, 0) / utilizationByDoctor.length)
               : 0

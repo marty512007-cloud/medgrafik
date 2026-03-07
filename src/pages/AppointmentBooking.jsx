@@ -33,17 +33,17 @@ export default function AppointmentBooking() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">📋 Управление записями</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">Управление записями</h1>
           <p className="text-gray-600 mt-1">Запись, отмена и перенос приёмов</p>
         </div>
 
-        <div className="card bg-red-50 border-2 border-red-200 p-8 text-center">
-          <p className="text-2xl mb-2">🔐 Доступ запрещён</p>
-          <p className="text-red-800 font-semibold">
+        <div className="card border border-gray-300 p-8 text-center">
+          <p className="text-xl mb-2 text-gray-900 font-semibold">Доступ запрещён</p>
+          <p className="text-gray-700">
             Только регистратор может управлять записями пациентов
           </p>
-          <p className="text-gray-600 mt-4 text-sm">
-            Ваша роль: <span className="font-bold capitalize">{user?.role}</span>
+          <p className="text-gray-500 mt-4 text-sm">
+            Ваша роль: <span className="font-medium">{user?.role}</span>
           </p>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function AppointmentBooking() {
     );
 
     if (result.success) {
-      success(`✅ Запись успешно создана!`);
+      success(`Запись успешно создана!`);
       setTimeout(() => {
         setStep("select-doctor");
         setSelectedDoctor(null);
@@ -84,7 +84,7 @@ export default function AppointmentBooking() {
         setPatientName("");
       }, 1500);
     } else {
-      error(`❌ ${result.error}`);
+      error(`${result.error}`);
     }
   };
 
@@ -96,12 +96,12 @@ export default function AppointmentBooking() {
 
     const result = cancelAppointment(selectedAppointmentId, cancelReason, user?.id);
     if (result.success) {
-      success("✅ Запись отменена");
+      success("Запись отменена");
       setShowCancelModal(false);
       setSelectedAppointmentId(null);
       setCancelReason("");
     } else {
-      error(`❌ ${result.error}`);
+      error(`${result.error}`);
     }
   };
 
@@ -115,12 +115,12 @@ export default function AppointmentBooking() {
     const result = rescheduleAppointment(rescheduleAppointmentId, newSlotDateTime, user?.id);
 
     if (result.success) {
-      success("✅ Запись перенесена");
+      success("Запись перенесена");
       setShowRescheduleModal(false);
       setRescheduleAppointmentId(null);
       setNewScheduleTime("");
     } else {
-      error(`❌ ${result.error}`);
+      error(`${result.error}`);
     }
   };
 
@@ -128,31 +128,31 @@ export default function AppointmentBooking() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">📋 Управление записями</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Управление записями</h1>
         <p className="text-gray-600 mt-1">Запись, отмена и перенос приёмов пациентов</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-0 border-b border-gray-200">
         <button
           onClick={() => setStep("select-doctor")}
-          className={`px-4 py-3 font-medium border-b-2 transition-colors ${
+          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             step === "select-doctor"
-              ? "border-primary-600 text-primary-600"
-              : "border-transparent text-gray-600"
+              ? "border-gray-900 text-gray-900"
+              : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          ➕ Новая запись
+          Новая запись
         </button>
         <button
           onClick={() => setStep("my-appointments")}
-          className={`px-4 py-3 font-medium border-b-2 transition-colors ${
+          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             step === "my-appointments"
-              ? "border-primary-600 text-primary-600"
-              : "border-transparent text-gray-600"
+              ? "border-gray-900 text-gray-900"
+              : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          📋 Все записи ({userAppointments.length})
+          Все записи ({userAppointments.length})
         </button>
       </div>
 
@@ -160,7 +160,7 @@ export default function AppointmentBooking() {
       {step === "select-doctor" && (
         <div className="card">
           <h3 className="card-header">Выберите врача</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {doctors.map(doctor => (
               <button
                 key={doctor.id}
@@ -168,11 +168,11 @@ export default function AppointmentBooking() {
                   setSelectedDoctor(doctor.id);
                   setStep("select-date");
                 }}
-                className="p-4 border-2 border-gray-200 rounded-xl hover:border-primary-600 hover:bg-primary-50 transition-all text-left"
+                className="p-4 border border-gray-200 hover:border-gray-500 hover:bg-gray-50 transition-colors text-left"
               >
-                <p className="font-semibold text-gray-900">{doctor.fio}</p>
-                <p className="text-sm text-gray-600 mt-1">🏥 {doctor.specialty}</p>
-                <p className="text-sm text-gray-600">🚪 Кабинет {doctor.cabinet}</p>
+                <p className="font-medium text-gray-900">{doctor.fio}</p>
+                <p className="text-sm text-gray-600 mt-1">{doctor.specialty}</p>
+                <p className="text-sm text-gray-500">Кабинет {doctor.cabinet}</p>
               </button>
             ))}
           </div>
@@ -197,15 +197,15 @@ export default function AppointmentBooking() {
             {availableSlots.length > 0 ? (
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-3">Доступное время</p>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                   {availableSlots.map((slot, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedSlot(slot.dateTime)}
-                      className={`p-3 rounded-xl font-semibold transition-all ${
+                      className={`p-3 font-medium transition-colors text-sm border ${
                         selectedSlot === slot.dateTime
-                          ? "bg-primary-600 text-white shadow-lg scale-105"
-                          : "bg-green-100 text-green-800 hover:shadow-md"
+                          ? "bg-gray-800 text-white border-gray-800"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                       }`}
                     >
                       {slot.dateTime.split(" ")[1]}
@@ -243,12 +243,12 @@ export default function AppointmentBooking() {
                   />
                 </div>
 
-                <div className="bg-primary-50 border border-primary-200 rounded-xl p-4">
+                <div className="bg-gray-50 border border-gray-200 p-4">
                   <p className="text-sm text-gray-700">
-                    <span className="font-semibold">Врач:</span> {doctors.find(d => d.id === selectedDoctor)?.fio}
+                    <span className="font-medium">Врач:</span> {doctors.find(d => d.id === selectedDoctor)?.fio}
                   </p>
                   <p className="text-sm text-gray-700 mt-2">
-                    <span className="font-semibold">Дата и время:</span> {dayjs(selectedSlot).format("DD.MM.YYYY HH:mm")}
+                    <span className="font-medium">Дата и время:</span> {dayjs(selectedSlot).format("DD.MM.YYYY HH:mm")}
                   </p>
                 </div>
 
@@ -281,20 +281,20 @@ export default function AppointmentBooking() {
         <div className="card">
           <h3 className="card-header">Все записи пациентов</h3>
           {userAppointments.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {userAppointments.map(apt => {
                 const doctor = doctors.find(d => d.id === apt.doctorId);
                 return (
-                  <div key={apt.id} className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
+                  <div key={apt.id} className="p-4 border border-gray-200">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{doctor?.fio}</p>
+                        <p className="font-medium text-gray-900">{doctor?.fio}</p>
                         <p className="text-sm text-gray-600 mt-1">{doctor?.specialty}</p>
                         <p className="text-sm text-gray-600 mt-1">
-                          📅 {dayjs(apt.slotDateTime).format("DD.MM.YYYY в HH:mm")}
+                          {dayjs(apt.slotDateTime).format("DD.MM.YYYY в HH:mm")}
                         </p>
-                        <p className="text-sm text-gray-600">👤 {apt.patientName}</p>
-                        <p className="text-sm text-gray-600">Код: {apt.patientCode}</p>
+                        <p className="text-sm text-gray-600">{apt.patientName}</p>
+                        <p className="text-sm text-gray-500">Код: {apt.patientCode}</p>
                       </div>
                       <div className="flex gap-2 flex-col">
                         <button
@@ -330,8 +330,8 @@ export default function AppointmentBooking() {
       {/* Cancel Modal */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Отмена записи</h3>
+          <div className="bg-white max-w-md w-full p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Отмена записи</h3>
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Причина отмены</label>
               <select
@@ -371,8 +371,8 @@ export default function AppointmentBooking() {
       {/* Reschedule Modal */}
       {showRescheduleModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Перенести запись</h3>
+          <div className="bg-white max-w-md w-full p-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Перенести запись</h3>
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Новая дата</label>
