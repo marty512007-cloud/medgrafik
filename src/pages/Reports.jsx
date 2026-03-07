@@ -40,7 +40,7 @@ export default function Reports() {
 
   const uniqueSpecialties = [...new Set(doctors.map(d => d.specialty))];
 
-  // 🔴 ВАЖНО: Используем useMemo для кеширования преобразованных данных
+  // Используем useMemo для кеширования преобразованных данных
   const chartDataByDoctor = useMemo(() => {
     return filteredDoctors.map((doc, index) => {
       const surname = extractLastName(doc.doctorName);

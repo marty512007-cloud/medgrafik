@@ -7,7 +7,7 @@ import "dayjs/locale/ru";
 dayjs.locale("ru");
 
 export default function DoctorManagement() {
-  const { doctors, workSlots, generateSchedule } = useSchedule();
+  const { doctors, workSlots, generateSchedule, deleteSchedule } = useSchedule();
   const { success, error, warning } = useToast();
   const [selectedDoctorId, setSelectedDoctorId] = useState(doctors[0]?.id);
   const [isLoading, setIsLoading] = useState(false);
@@ -111,8 +111,7 @@ export default function DoctorManagement() {
           <h3 className="card-header text-blue-900">📅 Существующее расписание</h3>
           <div className="space-y-2">
             {doctorSchedules.map((schedule, idx) => (
-              <div 
-                key={idx} 
+              <div key={idx} 
                 className="p-3 bg-white rounded-lg border border-blue-100 hover:shadow-md transition-shadow"
                 style={{
                   animation: `slideInFromLeft 0.4s ease-out ${idx * 0.1}s both`
@@ -133,6 +132,20 @@ export default function DoctorManagement() {
                       📊 Слотов: <span className="font-bold">{schedule.slots.length}</span>
                     </p>
                   </div>
+                  <button
+                    onClick={() => {
+                      const result = deleteSchedule(schedule.id);
+                      if (result.success) {
+                        success(`🗑️ Расписание на ${dayjs(schedule.date).format("DD.MM.YYYY")} удалено`);
+                      } else {
+                        error(`❌ ${result.error}`);
+                      }
+                    }}
+                    className="ml-4 px-3 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg text-sm font-medium transition-colors"
+                    title="Удалить расписание"
+                  >
+                    🗑️ Удалить
+                  </button>
                 </div>
               </div>
             ))}

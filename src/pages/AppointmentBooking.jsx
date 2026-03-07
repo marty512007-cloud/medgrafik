@@ -17,7 +17,7 @@ export default function AppointmentBooking() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [patientCode, setPatientCode] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [selectedDate, setSelectedDate] = useState(dayjs().add(1, "day").format("YYYY-MM-DD"));
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [cancelReason, setCancelReason] = useState("");

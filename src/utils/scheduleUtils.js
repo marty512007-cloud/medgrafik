@@ -25,9 +25,7 @@ export function generateSlots(date, startTime, endTime, slotMinutes, breakStart,
   while (current.isBefore(end)) {
     const slotEnd = current.add(slotMinutes, "minute");
 
-    // Проверяем, не попадает ли слот в перерыв
-    const startsBeforeBreak = current.isBefore(breakStartTime);
-    const endsAfterBreak = slotEnd.isAfter(breakEndTime);
+    // Пропускаем слоты, которые полностью или частично попадают в перерыв
     const completlyInBreak = current.isSameOrAfter(breakStartTime) && slotEnd.isSameOrBefore(breakEndTime);
 
     if (!completlyInBreak && !(current.isSameOrAfter(breakStartTime) && current.isBefore(breakEndTime))) {
@@ -130,7 +128,6 @@ export function calculateUtilization(workSlots, appointments) {
 
 /**
  * Получение утилизации по врачам
- * 🔴 ИСПРАВЛЕНО: Используем полное ФИО из объекта doctor (которое правильное)
  */
 export function getUtilizationByDoctor(doctors, workSlots, appointments, dateFrom, dateTo) {
   return doctors.map(doctor => {
@@ -149,10 +146,9 @@ export function getUtilizationByDoctor(doctors, workSlots, appointments, dateFro
       return slotDate >= dateFrom && slotDate <= dateTo;
     }).length;
 
-    // 🔴 ИСПРАВЛЕНО: Берем ФИО из объекта doctor, а не из appointments
     return {
       doctorId: doctor.id,
-      doctorName: doctor.fio, // ← ИСПОЛЬЗУЕМ ПРАВИЛЬНОЕ ФИО ИЗ doctor.fio
+      doctorName: doctor.fio,
       specialty: doctor.specialty,
       totalSlots,
       bookedSlots,

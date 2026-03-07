@@ -69,6 +69,12 @@ const scheduleReducer = (state, action) => {
         operationLog: [...state.operationLog, action.payload.log]
       };
 
+    case "DELETE_SCHEDULE":
+      return {
+        ...state,
+        workSlots: state.workSlots.filter(ws => ws.id !== action.payload)
+      };
+
     case "SET_ERROR":
       return {
         ...state,
@@ -229,7 +235,7 @@ export function ScheduleProvider({ children }) {
   }, [state.appointments]);
 
   const generateSchedule = useCallback((doctorId, date, startTime, endTime, slotMinutes, breakStart, breakEnd) => {
-    // 🔴 ПРОВЕРКА: существует ли уже расписание для этого врача на эту дату?
+    // Проверяем, существует ли уже расписание для этого врача на эту дату
     const existingSchedule = state.workSlots.find(
       ws => ws.doctorId === doctorId && ws.date === date
     );
@@ -281,6 +287,29 @@ export function ScheduleProvider({ children }) {
     return { success: true, slotCount: slots.length };
   }, [state.workSlots]);
 
+  const deleteSchedule = useCallback((scheduleId) => {
+    const schedule = state.workSlots.find(ws => ws.id === scheduleId);
+    if (!schedule) {
+      return { success: false, error: "Расписание не найдено" };
+    }
+
+    // Проверяем, есть ли активные записи к этому расписанию
+    const activeAppointments = state.appointments.filter(
+      a => a.doctorId === schedule.doctorId &&
+           a.slotDateTime.startsWith(schedule.date) &&
+           a.status === "booked"
+    );
+    if (activeAppointments.length > 0) {
+      return {
+        success: false,
+        error: `Нельзя удалить расписание: есть ${activeAppointments.length} активных записей на ${schedule.date}`
+      };
+    }
+
+    dispatch({ type: "DELETE_SCHEDULE", payload: scheduleId });
+    return { success: true };
+  }, [state.workSlots, state.appointments]);
+
   return (
     <ScheduleContext.Provider
       value={{
@@ -289,7 +318,8 @@ export function ScheduleProvider({ children }) {
         cancelAppointment,
         rescheduleAppointment,
         completeAppointment,
-        generateSchedule
+        generateSchedule,
+        deleteSchedule
       }}
     >
       {children}

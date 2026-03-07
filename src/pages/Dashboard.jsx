@@ -7,11 +7,10 @@ import "dayjs/locale/ru";
 
 dayjs.locale("ru");
 
-// 🔴 ФУНКЦИЯ ДЛЯ ИЗВЛЕЧЕНИЯ ФАМИЛИИ
 const extractLastName = (fullName) => {
   if (!fullName) return "Unknown";
   const parts = fullName.trim().split(/\s+/);
-  return parts[0]; // Первое слово - это фамилия
+  return parts[0];
 };
 
 export default function Dashboard() {
@@ -24,9 +23,9 @@ export default function Dashboard() {
   
   const utilizationByDoctor = getUtilizationByDoctor(doctors, workSlots, appointments, dateFrom, dateTo);
 
-  // 🔴 КРИТИЧЕСКОЕ: Преобразуем данные для графика - ТОЛЬКО ФАМИЛИИ
+  // Преобразуем данные для графика — только фамилии
   const chartData = utilizationByDoctor.map(doc => ({
-    name: extractLastName(doc.doctorName), // ← ТОЛЬКО ФАМИЛИЯ
+    name: extractLastName(doc.doctorName),
     utilization: doc.utilization,
     booked: doc.bookedSlots,
     total: doc.totalSlots
